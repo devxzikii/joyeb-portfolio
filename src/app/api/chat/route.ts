@@ -7,7 +7,7 @@ const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 const RATE_LIMIT_WINDOW = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 5;
-const GEMINI_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash'] as const;
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'] as const;
 
 const chatSchema = z.object({
   message: z.string().min(1).max(2000),
