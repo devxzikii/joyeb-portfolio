@@ -9,12 +9,34 @@ export interface PageMeta {
   twitterCard?: 'summary' | 'summary_large_image';
 }
 
+function getSiteUrl(rawUrl?: string): string {
+  const fallback = 'http://localhost:3000';
+  const value = rawUrl?.trim();
+
+  if (!value) {
+    return fallback;
+  }
+
+  const withProtocol = /^https?:\/\//i.test(value)
+    ? value
+    : /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(value)
+      ? `http://${value}`
+      : `https://${value}`;
+
+  try {
+    const parsed = new URL(withProtocol);
+    return parsed.toString().replace(/\/$/, '');
+  } catch {
+    return fallback;
+  }
+}
+
 // Base site configuration
 export const siteConfig = {
   name: heroConfig.name,
   title: 'Sleek Portfolio',
   description: 'Sleek Portfolio Template by @joyebdev',
-  url: process.env.NEXT_PUBLIC_URL || 'http://localhost:3000',
+  url: getSiteUrl(process.env.NEXT_PUBLIC_URL),
   ogImage: '/meta/opengraph-image.png',
   author: {
     name: about.name,
