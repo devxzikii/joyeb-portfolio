@@ -48,7 +48,42 @@ export default function Github() {
   const [totalContributions, setTotalContributions] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(1024);
   const { theme } = useTheme();
+
+  const isCompactScreen = viewportWidth < 640;
+  const isVerySmallScreen = viewportWidth < 420;
+  const calendarBlockSize = isVerySmallScreen
+    ? 5
+    : isCompactScreen
+      ? 7
+      : githubConfig.blockSize;
+  const calendarBlockMargin = isVerySmallScreen
+    ? 1
+    : isCompactScreen
+      ? 2
+      : githubConfig.blockMargin;
+  const calendarFontSize = isVerySmallScreen
+    ? 8
+    : isCompactScreen
+      ? 10
+      : githubConfig.fontSize;
+  const compactWeekdays = isCompactScreen
+    ? ['', '', '', '', '', '', '']
+    : githubConfig.weekdays;
+
+  useEffect(() => {
+    const updateViewportWidth = () => {
+      setViewportWidth(window.innerWidth);
+    };
+
+    updateViewportWidth();
+    window.addEventListener('resize', updateViewportWidth);
+
+    return () => {
+      window.removeEventListener('resize', updateViewportWidth);
+    };
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -174,21 +209,21 @@ export default function Github() {
         ) : (
           <div className="w-full">
             <div className="overflow-x-auto pb-2">
-              <div className="inline-block min-w-[720px] rounded-xl border border-border p-3 sm:p-5">
+              <div className="mx-auto w-fit max-w-full rounded-xl border border-border p-2 sm:p-5">
                 <ActivityCalendar
                   data={contributions}
-                  blockSize={10}
-                  blockMargin={3}
-                  fontSize={11}
+                  blockSize={calendarBlockSize}
+                  blockMargin={calendarBlockMargin}
+                  fontSize={calendarFontSize}
                   colorScheme={theme === 'dark' ? 'dark' : 'light'}
                   maxLevel={githubConfig.maxLevel}
                   hideTotalCount={true}
-                  hideColorLegend={false}
-                  hideMonthLabels={false}
+                  hideColorLegend={isCompactScreen}
+                  hideMonthLabels={isCompactScreen}
                   theme={githubConfig.theme}
                   labels={{
                     months: githubConfig.months,
-                    weekdays: githubConfig.weekdays,
+                    weekdays: compactWeekdays,
                     totalCount: githubConfig.totalCountLabel,
                   }}
                   style={{
