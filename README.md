@@ -8,7 +8,7 @@ A modern, responsive portfolio website built with Next.js 15, TypeScript, Tailwi
 
 Click here to your portfolio template now:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Framxcodes%2Fsleek-portfolio&env=TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID,GEMINI_API_KEY,NEXT_PUBLIC_URL,NEXT_PUBLIC_UMAMI_SRC,NEXT_PUBLIC_UMAMI_ID)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Framxcodes%2Fsleek-portfolio&env=RESEND_API_KEY,RESEND_FROM_EMAIL,CONTACT_RECIPIENT_EMAIL,TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID,GEMINI_API_KEY,NEXT_PUBLIC_URL,NEXT_PUBLIC_UMAMI_SRC,NEXT_PUBLIC_UMAMI_ID)
 
 ## Features
 
@@ -35,8 +35,11 @@ Before you begin, ensure you have the following installed:
 Create a `.env` file in the root directory with the following variables:
 
 ```env
-TELEGRAM_BOT_TOKEN="your-token"
-TELEGRAM_CHAT_ID="your-chat-id"
+RESEND_API_KEY="re_..."
+RESEND_FROM_EMAIL="contact@yourdomain.com"
+CONTACT_RECIPIENT_EMAIL="you@example.com"
+TELEGRAM_BOT_TOKEN="123456789:ABCdefYourBotToken"
+TELEGRAM_CHAT_ID="123456789"
 GEMINI_API_KEY="your-api-key"
 NODE_ENV="development"
 NEXT_PUBLIC_URL="http://localhost:3000"
@@ -44,21 +47,40 @@ NEXT_PUBLIC_UMAMI_SRC="your-umami-script-url"
 NEXT_PUBLIC_UMAMI_ID="your-umami-website-id"
 ```
 
+Notes:
+
+- `RESEND_FROM_EMAIL` must be an address on a domain you verified in Resend for production delivery.
+- `CONTACT_RECIPIENT_EMAIL` is the inbox that receives contact form messages.
+- `TELEGRAM_CHAT_ID` is usually a positive number for a personal chat and often starts with `-100` for a group.
+
 ### Setting up Telegram Integration
 
 1. Create a new bot with [@BotFather](https://t.me/botfather) on Telegram
 2. Copy the bot token and add it to your `.env` file as `TELEGRAM_BOT_TOKEN`
-3. Start a chat with your bot and send any message (e.g., "hello")
+3. Open your bot and send `/start` or any message so Telegram creates a chat for that bot
 4. Get your chat ID:
 
    ```bash
-   # Run the test script to get your chat ID
    bun run test-telegram
    ```
 
-   - The script will show your Chat ID from the message you sent
-   - Copy the Chat ID and add it to your `.env` file as `TELEGRAM_CHAT_ID`
-   - Run the script again to verify everything works
+   - The script validates your bot token
+   - It lists recent Telegram chat IDs seen by the bot
+   - Copy one of those IDs into `TELEGRAM_CHAT_ID`
+   - Run the script again to verify the configured chat ID is valid
+
+### Setting up Resend for Contact Form
+
+1. Create an API key in Resend and store it as `RESEND_API_KEY`
+2. Verify a sending domain in Resend
+3. Set `RESEND_FROM_EMAIL` to an address on that verified domain, for example:
+
+   ```env
+   RESEND_FROM_EMAIL="contact@yourdomain.com"
+   CONTACT_RECIPIENT_EMAIL="you@example.com"
+   ```
+
+4. If you keep using `onboarding@resend.dev`, Resend may only deliver in test mode to limited recipients associated with your account
 
 ### Setting up Umami Analytics
 

@@ -2,35 +2,42 @@ import { Resend } from 'resend';
 import { NextRequest, NextResponse } from 'next/server';
 import * as z from 'zod';
 
+const DEFAULT_CONTACT_RECIPIENT = 'joyebkofficial@gmail.com';
+const DEFAULT_RESEND_FROM_EMAIL = 'onboarding@resend.dev';
+
 async function sendTelegramNotification(data: {
   name: string;
   email: string;
   phone?: string;
   message: string;
 }): Promise<void> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
+  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
 
   if (!token || !chatId) {
     console.warn('Telegram not configured - skipping notification.');
     return;
   }
 
-  const phone = data.phone ? `📱 <b>Phone:</b> ${data.phone}\n` : '';
+  const safeName = escapeHtml(data.name);
+  const safeEmail = escapeHtml(data.email);
+  const safePhone = data.phone ? escapeHtml(data.phone) : '';
+  const safeMessage = escapeHtml(data.message);
+  const phone = safePhone ? `📱 <b>Phone:</b> ${safePhone}\n` : '';
 
   const text =
     `📬 <b>New Portfolio Message</b>\n\n` +
-    `👤 <b>Name:</b> ${data.name}\n` +
-    `📧 <b>Email:</b> ${data.email}\n` +
+    `👤 <b>Name:</b> ${safeName}\n` +
+    `📧 <b>Email:</b> ${safeEmail}\n` +
     `${phone}` +
-    `💬 <b>Message:</b>\n${data.message}\n\n` +
+    `💬 <b>Message:</b>\n${safeMessage}\n\n` +
     `⏰ ${new Date().toLocaleString('en-IN', {
       timeZone: 'Asia/Kolkata',
       dateStyle: 'medium',
       timeStyle: 'short',
     })}`;
 
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -39,6 +46,16 @@ async function sendTelegramNotification(data: {
       parse_mode: 'HTML',
     }),
   });
+
+  const payload = await response.json().catch(() => null);
+  if (!response.ok || payload?.ok === false) {
+    const description =
+      typeof payload?.description === 'string'
+        ? payload.description
+        : `Telegram API error: ${response.status}`;
+
+    throw new Error(description);
+  }
 }
 
 type RateLimitEntry = {
@@ -51,7 +68,16 @@ const rateLimitStore = new Map<string, RateLimitEntry>();
 
 const RATE_LIMIT_WINDOW = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 5;
-const CONTACT_RECIPIENT = 'joyebkofficial@gmail.com';
+
+function getContactRecipient(): string {
+  return (
+    process.env.CONTACT_RECIPIENT_EMAIL?.trim() || DEFAULT_CONTACT_RECIPIENT
+  );
+}
+
+function getResendFromEmail(): string {
+  return process.env.RESEND_FROM_EMAIL?.trim() || DEFAULT_RESEND_FROM_EMAIL;
+}
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, 'Name is required.').max(100),
@@ -209,10 +235,12 @@ export async function POST(request: NextRequest) {
 
     const body: unknown = await request.json();
     const validatedData = contactSchema.parse(body);
+    const contactRecipient = getContactRecipient();
+    const resendFromEmail = getResendFromEmail();
 
     const { error } = await resend.emails.send({
-      from: 'Joyeb Portfolio <onboarding@resend.dev>',
-      to: CONTACT_RECIPIENT,
+      from: `Joyeb Portfolio <${resendFromEmail}>`,
+      to: contactRecipient,
       replyTo: validatedData.email,
       subject: `📬 New message from ${validatedData.name} — joyeb.me`,
       html: buildEmailHtml(validatedData),
@@ -220,21 +248,42 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Resend error:', error);
+      const resendErrorMessage =
+        typeof error.message === 'string'
+          ? error.message
+          : 'Failed to send email. Please try again.';
+
       return NextResponse.json(
-        { error: 'Failed to send email. Please try again.' },
+        {
+          error:
+            resendErrorMessage.includes('verify a domain') ||
+            resendErrorMessage.includes('testing emails')
+              ? 'Resend is not fully configured. Verify your sending domain and set RESEND_FROM_EMAIL.'
+              : resendErrorMessage,
+        },
         { status: 500 },
       );
     }
 
-    // Send Telegram notification (non-blocking)
-    sendTelegramNotification(validatedData).catch((err) =>
-      console.warn('Telegram notification failed:', err),
-    );
+    let telegramWarning: string | null = null;
+
+    try {
+      await sendTelegramNotification(validatedData);
+    } catch (err) {
+      telegramWarning =
+        err instanceof Error
+          ? err.message
+          : 'Telegram notification failed. Check bot token and chat ID.';
+      console.warn('Telegram notification failed:', telegramWarning);
+    }
 
     return NextResponse.json(
       {
         success: true,
-        message: 'Email sent successfully!',
+        message: telegramWarning
+          ? 'Email sent successfully, but Telegram notification failed.'
+          : 'Email sent successfully!',
+        warnings: telegramWarning ? [telegramWarning] : [],
       },
       {
         status: 200,

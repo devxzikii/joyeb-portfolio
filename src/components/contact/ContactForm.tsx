@@ -57,6 +57,8 @@ type SubmitStatus = 'idle' | 'loading' | 'success' | 'error';
 export default function ContactForm() {
   const [status, setStatus] = useState<SubmitStatus>('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [warningMsg, setWarningMsg] = useState('');
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -71,6 +73,8 @@ export default function ContactForm() {
   const handleSubmit = async (data: ContactFormValues) => {
     setStatus('loading');
     setErrorMsg('');
+    setSuccessMsg('');
+    setWarningMsg('');
 
     try {
       const res = await fetch('/api/contact', {
@@ -91,6 +95,10 @@ export default function ContactForm() {
 
       setStatus('success');
       setErrorMsg('');
+      setSuccessMsg(result.message || 'Message sent! I\'ll get back to you soon.');
+      setWarningMsg(
+        Array.isArray(result.warnings) ? result.warnings.join(' ') : '',
+      );
       form.reset();
     } catch {
       setStatus('error');
@@ -208,8 +216,28 @@ export default function ContactForm() {
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
                 <p className="text-sm text-green-400">
-                  Message sent! I&apos;ll get back to you soon.
+                  {successMsg || 'Message sent! I\'ll get back to you soon.'}
                 </p>
+              </div>
+            )}
+
+            {status === 'success' && warningMsg && (
+              <div className="mt-2 flex items-center gap-3 rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#facc15"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <p className="text-sm text-yellow-300">{warningMsg}</p>
               </div>
             )}
 
