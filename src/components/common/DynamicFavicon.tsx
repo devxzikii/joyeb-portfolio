@@ -24,9 +24,8 @@ export default function DynamicFavicon() {
       );
       existingFavicons.forEach((el) => {
         try {
-          // Only remove if it actually has a parent node
-          if (el && el.parentNode) {
-            el.parentNode.removeChild(el);
+          if (el instanceof HTMLElement || el instanceof HTMLLinkElement) {
+            el.remove();
           }
         } catch {
           // Silently ignore if removal fails

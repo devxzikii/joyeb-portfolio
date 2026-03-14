@@ -1,11 +1,17 @@
 // oneko.js: https://github.com/adryd325/oneko.js
 
 (function oneko() {
+  if (window.__onekoInitialized__) {
+    return;
+  }
+
   const isReducedMotion =
     window.matchMedia(`(prefers-reduced-motion: reduce)`) === true ||
     window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true;
 
   if (isReducedMotion) return;
+
+  window.__onekoInitialized__ = true;
 
   const nekoEl = document.createElement('div');
 
@@ -85,6 +91,10 @@
   };
 
   function init() {
+    if (document.getElementById('oneko')) {
+      return;
+    }
+
     nekoEl.id = 'oneko';
     nekoEl.ariaHidden = true;
     nekoEl.style.width = '32px';

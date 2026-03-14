@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function ProjectsPage() {
   return (
-    <main className="relative min-h-screen bg-[#0D0D0D]">
+    <main className="relative min-h-screen bg-background text-foreground transition-colors">
       <ProjectsVerticalFeed mode="page" />
     </main>
   );

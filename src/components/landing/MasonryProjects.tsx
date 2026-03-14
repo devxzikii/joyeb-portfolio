@@ -59,7 +59,7 @@ const ActionButton = memo(function ActionButton({
   label: string;
 }): React.JSX.Element {
   const baseClassName =
-    'flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2.5 text-sm text-white transition-all duration-200';
+    'flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-black/10 bg-black/[0.02] px-4 py-2.5 text-sm text-foreground transition-all duration-200 dark:border-white/20 dark:bg-transparent dark:text-white';
 
   if (!href) {
     return (
@@ -75,7 +75,7 @@ const ActionButton = memo(function ActionButton({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`${baseClassName} hover:border-white/30 hover:bg-white/5`}
+      className={`${baseClassName} hover:border-black/15 hover:bg-black/4 dark:hover:border-white/30 dark:hover:bg-white/5`}
     >
       {icon}
       <span>{label}</span>
@@ -135,7 +135,7 @@ const ProjectCard = memo(function ProjectCard({
     <div ref={cardRef} className="mx-auto w-full max-w-lg">
       <motion.div style={{ y: cardY }}>
         <motion.div
-          className="group relative w-full overflow-hidden rounded-[1.35rem] border border-white/10 bg-white/6 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl transition-all duration-300 supports-backdrop-filter:bg-white/8"
+          className="group relative w-full overflow-hidden rounded-[1.35rem] border border-black/8 bg-white/70 p-2 shadow-[0_18px_40px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 supports-backdrop-filter:bg-white/75 dark:border-white/10 dark:bg-white/6 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] dark:supports-backdrop-filter:bg-white/8"
           whileHover={
             prefersReducedMotion
               ? undefined
@@ -151,7 +151,7 @@ const ProjectCard = memo(function ProjectCard({
         >
           <motion.div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 rounded-[1.35rem] border border-white/12"
+            className="pointer-events-none absolute inset-0 rounded-[1.35rem] border border-black/10 dark:border-white/12"
             style={{ opacity: borderOpacity, scale: borderScale }}
           />
           <motion.div
@@ -161,12 +161,12 @@ const ProjectCard = memo(function ProjectCard({
           />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-px rounded-[1.25rem] bg-linear-to-br from-white/10 via-white/4 to-transparent"
+            className="pointer-events-none absolute inset-px rounded-[1.25rem] bg-linear-to-br from-white/75 via-white/30 to-transparent dark:from-white/10 dark:via-white/4"
           />
 
-          <article className="relative overflow-hidden rounded-[1.05rem] border border-[#2A2A2A] bg-[#1A1A1A]">
+          <article className="relative overflow-hidden rounded-[1.05rem] border border-black/8 bg-white/95 dark:border-[#2A2A2A] dark:bg-[#1A1A1A]">
             <motion.div
-              className="relative h-60 overflow-hidden rounded-t-[1.05rem] bg-[#0D0D0D] sm:h-64"
+              className="relative h-60 overflow-hidden rounded-t-[1.05rem] bg-slate-100 sm:h-64 dark:bg-[#0D0D0D]"
               style={{ scale: imageScale }}
             >
               <Image
@@ -176,7 +176,7 @@ const ProjectCard = memo(function ProjectCard({
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-linear-to-b from-transparent to-[#1A1A1A]/20" />
+              <div className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/10 dark:to-[#1A1A1A]/20" />
             </motion.div>
 
             <div className="space-y-4 p-5">
@@ -184,23 +184,27 @@ const ProjectCard = memo(function ProjectCard({
                 <span className="text-xs text-[#4ADE80]">{category}</span>
               </div>
 
-              <h3 className="text-xl font-semibold tracking-tight text-white">{title}</h3>
+              <h3 className="text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                {title}
+              </h3>
 
-              <p className="line-clamp-2 text-sm leading-relaxed text-white/60">{description}</p>
+              <p className="line-clamp-2 text-sm leading-relaxed text-slate-600 dark:text-white/60">
+                {description}
+              </p>
 
               <div className="flex items-center gap-2">
                 {technologies.slice(0, 3).map((technology, iconIndex) => (
                   <span
                     key={`${title}-${technology.name}-${iconIndex}`}
                     title={technology.name}
-                    className="flex h-7 w-7 items-center justify-center rounded-md border border-white/15 bg-black/20 [&_img]:h-3.5 [&_img]:w-3.5 [&_svg]:h-3.5 [&_svg]:w-3.5"
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-black/10 bg-slate-100 text-slate-700 [&_img]:h-3.5 [&_img]:w-3.5 [&_svg]:h-3.5 [&_svg]:w-3.5 dark:border-white/15 dark:bg-black/20 dark:text-white"
                   >
                     {technology.icon}
                   </span>
                 ))}
               </div>
 
-              <div className="h-px bg-[#2A2A2A]" />
+              <div className="h-px bg-black/8 dark:bg-[#2A2A2A]" />
 
               <div className="flex gap-3">
                 <ActionButton
@@ -325,13 +329,13 @@ export function ProjectsVerticalFeed({ mode }: { mode: FeedMode }) {
 
   if (mode === 'page') {
     return (
-      <section className="min-h-screen bg-[#0D0D0D] px-4 pb-12 pt-20 sm:px-6">
+      <section className="min-h-screen bg-background px-4 pb-12 pt-20 text-foreground transition-colors sm:px-6">
         <div className="mx-auto max-w-7xl">
           <div className="mb-16 space-y-4">
-            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl md:text-4xl lg:text-5xl">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl lg:text-5xl">
               Featured Projects
             </h1>
-            <p className="max-w-2xl text-sm text-white/60 sm:text-base md:text-lg">
+            <p className="max-w-2xl text-sm text-muted-foreground sm:text-base md:text-lg">
               A collection of professional web development projects showcasing modern
               design and full-stack capabilities.
             </p>

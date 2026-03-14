@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 
 import Moon from '../svgs/Moon';
 import Sun from '../svgs/Sun';
@@ -19,18 +19,12 @@ export const useThemeToggle = ({
   blur?: boolean;
   gifUrl?: string;
 } = {}) => {
-  const { theme, setTheme, resolvedTheme } = useTheme();
-
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    setIsDark(resolvedTheme === 'dark');
-  }, [resolvedTheme]);
-
+  const { setTheme, resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   const styleId = 'theme-transition-styles';
 
   const updateStyles = useCallback((css: string, name: string) => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !document.head) return;
 
     let styleElement = document.getElementById(styleId);
 
@@ -44,82 +38,65 @@ export const useThemeToggle = ({
     styleElement.textContent = css;
   }, []);
 
+  const applyTheme = useCallback(
+    (nextTheme: 'light' | 'dark') => {
+      if (typeof window === 'undefined') return;
+      if (!resolvedTheme || resolvedTheme === nextTheme) return;
+
+      const animation = createAnimation(variant, start, blur, gifUrl);
+      updateStyles(animation.css, animation.name);
+
+      const commitTheme = () => {
+        const root = document.documentElement;
+
+        root.classList.remove('light', 'dark');
+        root.classList.add(nextTheme);
+        root.style.colorScheme = nextTheme;
+
+        try {
+          window.localStorage.setItem('theme', nextTheme);
+        } catch {}
+
+        setTheme(nextTheme);
+      };
+
+      const supportsViewTransitions =
+        typeof document.startViewTransition === 'function' &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!supportsViewTransitions) {
+        commitTheme();
+        return;
+      }
+
+      try {
+        const transition = document.startViewTransition(() => {
+          commitTheme();
+        });
+
+        transition.ready?.catch(() => {});
+        transition.finished?.catch(() => {});
+      } catch {
+        commitTheme();
+      }
+    },
+    [blur, gifUrl, resolvedTheme, setTheme, start, updateStyles, variant],
+  );
+
   const toggleTheme = useCallback(() => {
-    setIsDark(!isDark);
-
-    const animation = createAnimation(variant, start, blur, gifUrl);
-
-    updateStyles(animation.css, animation.name);
-
-    if (typeof window === 'undefined') return;
-
-    const switchTheme = () => {
-      setTheme(theme === 'light' ? 'dark' : 'light');
-    };
-
-    if (!document.startViewTransition) {
-      switchTheme();
-      return;
-    }
-
-    document.startViewTransition(switchTheme);
-  }, [
-    theme,
-    setTheme,
-    variant,
-    start,
-    blur,
-    gifUrl,
-    updateStyles,
-    isDark,
-    setIsDark,
-  ]);
+    applyTheme(isDark ? 'light' : 'dark');
+  }, [applyTheme, isDark]);
 
   const setCrazyLightTheme = useCallback(() => {
-    setIsDark(false);
-
-    const animation = createAnimation(variant, start, blur, gifUrl);
-
-    updateStyles(animation.css, animation.name);
-
-    if (typeof window === 'undefined') return;
-
-    const switchTheme = () => {
-      setTheme('light');
-    };
-
-    if (!document.startViewTransition) {
-      switchTheme();
-      return;
-    }
-
-    document.startViewTransition(switchTheme);
-  }, [setTheme, variant, start, blur, gifUrl, updateStyles, setIsDark]);
+    applyTheme('light');
+  }, [applyTheme]);
 
   const setCrazyDarkTheme = useCallback(() => {
-    setIsDark(true);
-
-    const animation = createAnimation(variant, start, blur, gifUrl);
-
-    updateStyles(animation.css, animation.name);
-
-    if (typeof window === 'undefined') return;
-
-    const switchTheme = () => {
-      setTheme('dark');
-    };
-
-    if (!document.startViewTransition) {
-      switchTheme();
-      return;
-    }
-
-    document.startViewTransition(switchTheme);
-  }, [setTheme, variant, start, blur, gifUrl, updateStyles, setIsDark]);
+    applyTheme('dark');
+  }, [applyTheme]);
 
   return {
     isDark,
-    setIsDark,
     toggleTheme,
     setCrazyLightTheme,
     setCrazyDarkTheme,
@@ -141,7 +118,7 @@ export const ThemeToggleButton = ({
   blur?: boolean;
   gifUrl?: string;
 }) => {
-  const { isDark, toggleTheme } = useThemeToggle({
+  const { toggleTheme } = useThemeToggle({
     variant,
     start,
     blur,
@@ -161,7 +138,10 @@ export const ThemeToggleButton = ({
       aria-label="Toggle theme"
     >
       <span className="sr-only">Toggle theme</span>
-      {isDark ? <Moon className="size-4" /> : <Sun className="size-4" />}
+      <span className="relative size-4" aria-hidden="true">
+        <Sun className="absolute inset-0 size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+        <Moon className="absolute inset-0 size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      </span>
     </Button>
   );
 };
