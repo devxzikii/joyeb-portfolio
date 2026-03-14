@@ -3,14 +3,13 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import Image from 'next/image';
-import { Link } from 'next-view-transitions';
 import { projects } from '@/config/Projects';
 import SectionHeading from '@/components/common/SectionHeading';
 import ArrowUpRight from '@/components/svgs/ArrowUpRight';
 
 export default function MasonryProjects() {
   return (
-    <section id="projects" className="py-14 sm:py-20">
+    <section id="projects" className="py-14 px-0 sm:py-20">
       {/* Header */}
       <div className="mb-10 flex items-end justify-between gap-4 sm:mb-12">
         <div>
@@ -34,13 +33,13 @@ export default function MasonryProjects() {
       </div>
 
       <div className="flex justify-center mt-16">
-        <Link
-          href="/contact"
+        <a
+          href="/#contact"
           className="group flex w-full items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm text-muted-foreground transition-all duration-200 hover:border-foreground/30 hover:text-foreground sm:w-auto sm:px-8"
         >
-          Let's work together
-          <ArrowUpRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />
-        </Link>
+          Let&apos;s work together
+          <ArrowUpRight className="h-4 w-4 flex-shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />
+        </a>
       </div>
     </section>
   );

@@ -18,9 +18,9 @@ export default function About() {
             alt="About"
             width={100}
             height={100}
-            className="border-secondary size-36 shrink-0 self-start rounded-md border-2 bg-blue-300 sm:size-44 md:size-60 dark:bg-yellow-300"
+            className="border-secondary size-36 shrink-0 self-start rounded-md border-2 bg-blue-300 sm:size-44 md:size-60 dark:bg-yellow-300 mx-auto md:mx-0"
           />
-          <div className="mt-0">
+          <div className="mt-0 text-center md:text-left">
             <h3 className="text-2xl font-bold sm:text-3xl">{about.name}</h3>
             <p className="text-secondary mt-3 leading-relaxed sm:mt-4">
               {about.description}

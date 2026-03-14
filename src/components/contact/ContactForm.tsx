@@ -185,7 +185,7 @@ export default function ContactForm() {
 
             <Button
               type="submit"
-              className="w-fit disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full disabled:cursor-not-allowed disabled:opacity-50 sm:w-fit"
               disabled={status === 'loading'}
             >
               {status === 'loading' ? (

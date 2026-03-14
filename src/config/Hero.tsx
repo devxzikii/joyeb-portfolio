@@ -98,7 +98,7 @@ export const heroConfig = {
     {
       variant: 'default',
       text: 'Get in touch',
-      href: '/contact',
+      href: '/#contact',
       icon: 'Chat',
     },
   ],

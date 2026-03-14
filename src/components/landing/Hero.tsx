@@ -70,7 +70,7 @@ export default function Hero() {
       </div>
 
       {/* Buttons */}
-      <div className="mt-6 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
+      <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:gap-4">
         {buttons.map((button, index) => {
           const IconComponent =
             buttonIcons[button.icon as keyof typeof buttonIcons];
@@ -79,6 +79,7 @@ export default function Hero() {
               key={index}
               variant={button.variant as 'outline' | 'default'}
               className={cn(
+                'w-full sm:w-auto',
                 button.variant === 'outline' && 'inset-shadow-indigo-500',
                 button.variant === 'default' && 'inset-shadow-indigo-500',
               )}
@@ -91,7 +92,7 @@ export default function Hero() {
       </div>
 
       {/* Social Links */}
-      <div className="mt-8 flex items-center gap-4">
+      <div className="mt-8 flex flex-wrap items-center gap-4">
         {socialLinks.map((link) => (
           <Tooltip key={link.name} delayDuration={0}>
             <TooltipTrigger asChild>
@@ -100,7 +101,7 @@ export default function Hero() {
                 key={link.name}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors duration-200"
+                className="text-muted-foreground hover:text-foreground flex min-h-[44px] min-w-[44px] items-center justify-center transition-colors duration-200"
                 aria-label={link.name}
               >
                 {link.icon}

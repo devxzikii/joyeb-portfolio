@@ -1,6 +1,7 @@
 import Container from '@/components/common/Container';
 import About from '@/components/landing/About';
 import Blog from '@/components/landing/Blog';
+import Contact from '@/components/landing/Contact';
 import Github from '@/components/landing/Github';
 import Hero from '@/components/landing/Hero';
 import MasonryProjects from '@/components/landing/MasonryProjects';
@@ -14,6 +15,7 @@ export default function page() {
       <About />
       <Github />
       <Blog />
+      <Contact />
     </Container>
   );
 }

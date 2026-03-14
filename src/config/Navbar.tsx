@@ -21,7 +21,7 @@ export const navbarConfig = {
     },
     {
       label: 'Contact',
-      href: '/contact',
+      href: '/#contact',
     },
   ] as NavItem[],
 };

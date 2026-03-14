@@ -155,14 +155,14 @@ export default function Github() {
 
   return (
     <Container className="mt-16 md:mt-20">
-      <div className="w-full overflow-hidden space-y-6">
+      <div className="w-full space-y-6">
         {/* Header */}
-        <div className="flex justify-center">
+        <div className="mx-auto flex justify-center text-center">
           <div className="text-center">
             <h2 className="text-foreground text-2xl font-bold sm:text-3xl">
               {githubConfig.title}
             </h2>
-            <p className="text-muted-foreground text-sm sm:text-base">
+            <p className="text-muted-foreground mx-auto text-sm sm:text-base">
               <b>{githubConfig.username}</b>&apos;s {githubConfig.subtitle}
             </p>
             {!isLoading && !hasError && totalContributions > 0 && (
@@ -207,7 +207,7 @@ export default function Github() {
             </Button>
           </div>
         ) : (
-          <div className="w-full">
+          <div className="w-full flex justify-center items-center overflow-x-auto">
             <div className="overflow-x-auto pb-2">
               <div className="mx-auto inline-flex min-w-max rounded-xl border border-border p-3 sm:p-5">
                 <ActivityCalendar
