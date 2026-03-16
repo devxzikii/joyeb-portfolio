@@ -22,7 +22,7 @@ export function ProjectsVerticalFeed() {
       id="projects"
       className="flex w-full flex-col items-center px-4 py-16 md:py-24"
     >
-      <div className="flex w-full max-w-5xl flex-col items-center rounded-3xl border border-white/10 px-4 py-6 sm:px-6 md:py-8">
+      <div className="flex w-full max-w-5xl flex-col items-center rounded-3xl px-4 py-6 sm:px-6 md:py-8">
         <div className="mb-10 flex flex-col items-center gap-1 text-center">
           <p className="text-muted-foreground text-sm">Featured</p>
           <h2 className="text-3xl font-bold md:text-4xl">My Work</h2>
@@ -34,7 +34,7 @@ export function ProjectsVerticalFeed() {
             return (
               <motion.div
                 key={project.title}
-                className="group relative flex w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0D0D0D] transition-all duration-300 hover:-translate-y-1 hover:border-[#4ADE80]/50 hover:shadow-[0_0_30px_rgba(74,222,128,0.1)]"
+                className="group relative flex w-full flex-col overflow-hidden rounded-2xl bg-[#0D0D0D] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(74,222,128,0.1)]"
                 whileHover={{
                   y: -4,
                 }}
@@ -67,7 +67,7 @@ export function ProjectsVerticalFeed() {
 
                 <div className="space-y-3 p-4">
                   {/* Category tag */}
-                  <div className="inline-flex w-fit items-center rounded-full border border-[#4ADE80]/30 bg-[#4ADE80]/10 px-3 py-1">
+                  <div className="inline-flex w-fit items-center rounded-full bg-[#4ADE80]/10 px-3 py-1">
                     <span className="text-xs font-medium text-[#4ADE80]">
                       {category}
                     </span>
@@ -90,7 +90,7 @@ export function ProjectsVerticalFeed() {
                         href={project.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 px-3 py-2.5 text-xs font-medium text-white/70 transition-all duration-200 hover:border-white/30 hover:bg-white/5 hover:text-white"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/5 px-3 py-2.5 text-xs font-medium text-white/70 transition-all duration-200 hover:bg-white/10 hover:text-white"
                       >
                         <ExternalLink className="h-4 w-4" />
                         <span>Live Site</span>
@@ -101,7 +101,7 @@ export function ProjectsVerticalFeed() {
                         href={project.github}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 px-3 py-2.5 text-xs font-medium text-white/70 transition-all duration-200 hover:border-white/30 hover:bg-white/5 hover:text-white"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/5 px-3 py-2.5 text-xs font-medium text-white/70 transition-all duration-200 hover:bg-white/10 hover:text-white"
                       >
                         <Github className="h-4 w-4" />
                         <span>GitHub</span>
