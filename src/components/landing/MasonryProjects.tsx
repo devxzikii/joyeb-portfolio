@@ -12,7 +12,7 @@ import {
 } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { memo, useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 type FeedMode = 'homepage' | 'page';
 
@@ -29,39 +29,13 @@ type ProjectCardData = {
 
 type ProjectCardVariant = 'default' | 'reel';
 
-type LenisControl = {
-  start?: () => void;
-  stop?: () => void;
-};
-
-type LenisContainer = {
-  lenis?: LenisControl;
-};
-
-function resolveLenisControl(value: unknown): LenisControl | null {
-  if (!value || typeof value !== 'object') {
-    return null;
-  }
-
-  const direct = value as LenisControl;
-  if (typeof direct.start === 'function' || typeof direct.stop === 'function') {
-    return direct;
-  }
-
-  const nested = (value as LenisContainer).lenis;
-  if (
-    nested &&
-    (typeof nested.start === 'function' || typeof nested.stop === 'function')
-  ) {
-    return nested;
-  }
-
-  return null;
-}
-
 const CARD_ACCENT = '#4ADE80';
+const REEL_CARD_BACKGROUNDS = ['#1a2018', '#1a1824'] as const;
+const WHEEL_SWITCH_THRESHOLD = 40;
+const TOUCH_SWIPE_THRESHOLD = 50;
+const SWITCH_COOLDOWN_MS = 700;
 
-const projectCards: ProjectCardData[] = projects.map((project, index) => {
+const toProjectCardData = (project: (typeof projects)[number], index: number): ProjectCardData => {
   const category =
     project.technologies.length > 0
       ? project.technologies
@@ -80,7 +54,16 @@ const projectCards: ProjectCardData[] = projects.map((project, index) => {
     githubUrl: project.github || '',
     technologies: project.technologies,
   };
-});
+};
+
+const projectCards: ProjectCardData[] = projects.map((project, index) =>
+  toProjectCardData(project, index),
+);
+
+const featuredProjects = [projects[0], projects[1]];
+const featuredProjectCards: ProjectCardData[] = featuredProjects
+  .filter((project): project is (typeof projects)[number] => Boolean(project))
+  .map((project, index) => toProjectCardData(project, index));
 
 const ActionButton = memo(function ActionButton({
   href,
@@ -380,95 +363,379 @@ function ProjectCardList({
   );
 }
 
+const ReelProjectCard = memo(function ReelProjectCard({
+  project,
+  cardBgColor,
+}: {
+  project: ProjectCardData;
+  cardBgColor: string;
+}) {
+  return (
+    <article
+      className="flex h-full flex-col overflow-hidden rounded-[1.25rem] border border-white/10"
+      style={{ backgroundColor: cardBgColor }}
+    >
+      <div className="relative flex-[1.2] overflow-hidden rounded-t-xl">
+        <Image
+          src={project.imageUrl}
+          alt={project.title}
+          fill
+          sizes="(max-width: 768px) 100vw, 900px"
+          className="object-cover"
+        />
+        <div
+          className="absolute bottom-0 left-0 h-10 w-full"
+          style={{
+            backgroundImage: `linear-gradient(to bottom, transparent, ${cardBgColor})`,
+          }}
+        />
+      </div>
+
+      <div className="flex flex-1 flex-col justify-between p-3 md:p-4">
+        <div className="space-y-2">
+          <p className="font-mono text-[10px] tracking-[0.18em] text-white/30">
+            {project.number}
+          </p>
+          <h3 className="text-sm font-semibold text-white md:text-base">{project.title}</h3>
+          <p className="hidden line-clamp-2 text-[11px] text-white/50 min-[420px]:block">
+            {project.description}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between pt-3">
+          {project.liveUrl ? (
+            <a
+              href={project.liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-medium text-white/90 transition-colors hover:text-white"
+            >
+              <span className="relative inline-flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#4ADE80]/80" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#4ADE80]" />
+              </span>
+              <span>Live Site</span>
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          ) : (
+            <span className="inline-flex items-center gap-2 text-xs font-medium text-white/40">
+              <span className="h-2 w-2 rounded-full bg-white/30" />
+              <span>Live Site</span>
+            </span>
+          )}
+
+          <div className="hidden items-center gap-1.5 min-[420px]:flex">
+            {project.technologies.slice(0, 4).map((technology, iconIndex) => (
+              <span
+                key={`${project.title}-${technology.name}-${iconIndex}`}
+                title={technology.name}
+                className="flex h-5 w-5 items-center justify-center rounded-md bg-white/10 text-white [&_img]:h-3 [&_img]:w-3 [&_svg]:h-3 [&_svg]:w-3"
+              >
+                {technology.icon}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+});
+
+ReelProjectCard.displayName = 'ReelProjectCard';
+
 function ProjectReel({ items }: { items: ProjectCardData[] }) {
-  const reelViewportRef = useRef<HTMLDivElement | null>(null);
-  const lenisControlRef = useRef<LenisControl | null>(null);
+  const reelRef = useRef<HTMLDivElement | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const lastSwitchAtRef = useRef(0);
+  const unlockTimerRef = useRef<number | null>(null);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [hasSeenBothCards, setHasSeenBothCards] = useState(false);
+  const [isScrollLocked, setIsScrollLocked] = useState(false);
+  const reelItems = items.slice(0, 2);
 
-  useEffect(() => {
-    type WindowWithLenis = Window & { lenis?: unknown };
-
-    const assignLenisControl = () => {
-      if (typeof window === 'undefined') {
+  const switchCard = useCallback(
+    (direction: 1 | -1) => {
+      const now = Date.now();
+      if (now - lastSwitchAtRef.current < SWITCH_COOLDOWN_MS) {
         return;
       }
 
-      lenisControlRef.current = resolveLenisControl(
-        (window as unknown as WindowWithLenis).lenis,
-      );
-    };
+      setActiveCardIndex((current) => {
+        if (direction === 1 && current < reelItems.length - 1) {
+          lastSwitchAtRef.current = now;
 
-    assignLenisControl();
+          if (current === 0) {
+            setHasSeenBothCards(true);
+          }
 
-    if (!lenisControlRef.current) {
-      const timer = window.setTimeout(assignLenisControl, 250);
-      return () => {
-        window.clearTimeout(timer);
-      };
-    }
-  }, []);
+          return current + 1;
+        }
 
-  const handleMouseEnter = () => {
-    if (typeof lenisControlRef.current?.stop === 'function') {
-      lenisControlRef.current.stop();
-    }
-  };
+        if (direction === -1 && current > 0) {
+          lastSwitchAtRef.current = now;
+          return current - 1;
+        }
 
-  const handleMouseLeave = () => {
-    if (typeof lenisControlRef.current?.start === 'function') {
-      lenisControlRef.current.start();
-    }
-  };
+        return current;
+      });
+    },
+    [reelItems.length],
+  );
 
-  const handleWheelCapture = (event: React.WheelEvent<HTMLDivElement>) => {
-    const viewport = reelViewportRef.current;
-    if (!viewport) {
+  const handleWheel = useCallback(
+    (event: WheelEvent) => {
+      if (!isScrollLocked) {
+        return;
+      }
+
+      if (event.deltaY > WHEEL_SWITCH_THRESHOLD) {
+        event.preventDefault();
+        switchCard(1);
+      } else if (event.deltaY < -WHEEL_SWITCH_THRESHOLD) {
+        event.preventDefault();
+        switchCard(-1);
+      }
+    },
+    [isScrollLocked, switchCard],
+  );
+
+  const handleTouchStart = useCallback(
+    (event: TouchEvent) => {
+      if (!isScrollLocked) {
+        return;
+      }
+
+      touchStartYRef.current = event.touches[0]?.clientY ?? null;
+    },
+    [isScrollLocked],
+  );
+
+  const handleTouchMove = useCallback(
+    (event: TouchEvent) => {
+      if (!isScrollLocked) {
+        return;
+      }
+
+      event.preventDefault();
+    },
+    [isScrollLocked],
+  );
+
+  const handleTouchEnd = useCallback(
+    (event: TouchEvent) => {
+      if (!isScrollLocked || touchStartYRef.current === null) {
+        return;
+      }
+
+      const endY = event.changedTouches[0]?.clientY ?? touchStartYRef.current;
+      const distance = endY - touchStartYRef.current;
+
+      if (distance < -TOUCH_SWIPE_THRESHOLD) {
+        switchCard(1);
+      } else if (distance > TOUCH_SWIPE_THRESHOLD) {
+        switchCard(-1);
+      }
+
+      touchStartYRef.current = null;
+    },
+    [isScrollLocked, switchCard],
+  );
+
+  const handleUnlockedWheel = useCallback(
+    (event: React.WheelEvent<HTMLDivElement>) => {
+      if (isScrollLocked || !hasSeenBothCards || activeCardIndex !== 1) {
+        return;
+      }
+
+      if (event.deltaY < -WHEEL_SWITCH_THRESHOLD) {
+        switchCard(-1);
+      }
+    },
+    [activeCardIndex, hasSeenBothCards, isScrollLocked, switchCard],
+  );
+
+  const handleUnlockedTouchStart = useCallback(
+    (event: React.TouchEvent<HTMLDivElement>) => {
+      if (isScrollLocked || !hasSeenBothCards || activeCardIndex !== 1) {
+        return;
+      }
+
+      touchStartYRef.current = event.touches[0]?.clientY ?? null;
+    },
+    [activeCardIndex, hasSeenBothCards, isScrollLocked],
+  );
+
+  const handleUnlockedTouchEnd = useCallback(
+    (event: React.TouchEvent<HTMLDivElement>) => {
+      if (
+        isScrollLocked ||
+        !hasSeenBothCards ||
+        activeCardIndex !== 1 ||
+        touchStartYRef.current === null
+      ) {
+        return;
+      }
+
+      const endY = event.changedTouches[0]?.clientY ?? touchStartYRef.current;
+      const distance = endY - touchStartYRef.current;
+
+      if (distance > TOUCH_SWIPE_THRESHOLD) {
+        switchCard(-1);
+      }
+
+      touchStartYRef.current = null;
+    },
+    [activeCardIndex, hasSeenBothCards, isScrollLocked, switchCard],
+  );
+
+  useEffect(() => {
+    const reelSection = reelRef.current;
+
+    if (!reelSection || hasSeenBothCards || reelItems.length < 2) {
       return;
     }
 
-    const { scrollTop, scrollHeight, clientHeight } = viewport;
-    const canScrollUp = scrollTop > 0;
-    const canScrollDown = scrollTop + clientHeight < scrollHeight;
-    const isScrollingUp = event.deltaY < 0;
-    const isScrollingDown = event.deltaY > 0;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
+          setIsScrollLocked(true);
+        }
 
-    if ((isScrollingUp && canScrollUp) || (isScrollingDown && canScrollDown)) {
-      event.stopPropagation();
+        if (!entry.isIntersecting) {
+          setIsScrollLocked(false);
+        }
+      },
+      {
+        threshold: [0, 0.35, 0.7, 1],
+      },
+    );
+
+    observer.observe(reelSection);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasSeenBothCards, reelItems.length]);
+
+  useEffect(() => {
+    if (!hasSeenBothCards) {
+      return;
     }
-  };
+
+    unlockTimerRef.current = window.setTimeout(() => {
+      setIsScrollLocked(false);
+      lastSwitchAtRef.current = 0;
+    }, 420);
+
+    return () => {
+      if (unlockTimerRef.current) {
+        window.clearTimeout(unlockTimerRef.current);
+      }
+    };
+  }, [hasSeenBothCards]);
+
+  useEffect(() => {
+    if (!isScrollLocked || hasSeenBothCards) {
+      document.body.style.overflow = '';
+      return;
+    }
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [
+    handleTouchEnd,
+    handleTouchMove,
+    handleTouchStart,
+    handleWheel,
+    hasSeenBothCards,
+    isScrollLocked,
+  ]);
+
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = '';
+      if (unlockTimerRef.current) {
+        window.clearTimeout(unlockTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <div className="relative mx-auto w-full max-w-3xl">
-      <div className="pointer-events-none absolute inset-x-7 top-7 z-20 flex items-center justify-between">
-        <span className="rounded-full border border-black/10 bg-background/80 px-3 py-1 text-[11px] font-medium tracking-[0.22em] text-muted-foreground uppercase backdrop-blur-sm dark:border-white/12">
-          Project Reel
-        </span>
-        <span className="rounded-full border border-black/10 bg-background/80 px-3 py-1 text-[11px] font-medium text-muted-foreground backdrop-blur-sm dark:border-white/12">
-          Scroll to switch
-        </span>
-      </div>
-
+    <div ref={reelRef} className="relative mx-auto w-full max-w-3xl">
       <div className="relative overflow-hidden rounded-4xl border border-black/10 bg-linear-to-b from-black/3 via-transparent to-transparent p-3 shadow-[0_28px_80px_rgba(15,23,42,0.12)] dark:border-white/12 dark:from-white/4">
         <div className="pointer-events-none absolute inset-x-3 top-3 z-10 h-16 rounded-t-3xl bg-linear-to-b from-background/90 to-transparent" />
         <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 h-20 rounded-b-3xl bg-linear-to-t from-background/95 to-transparent" />
 
         <div
-          ref={reelViewportRef}
-          data-lenis-prevent
-          className="scrollbar-hidden relative h-[70vh] min-h-136 max-h-192 snap-y snap-mandatory overflow-y-auto overscroll-y-contain scroll-smooth rounded-[1.55rem] px-1 touch-pan-y sm:h-[74vh]"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          onTouchStart={handleMouseEnter}
-          onTouchEnd={handleMouseLeave}
-          onWheelCapture={handleWheelCapture}
+          className="relative h-[70vh] min-h-136 max-h-192 overflow-hidden rounded-[1.55rem] p-3 md:p-4 sm:h-[74vh]"
+          onWheel={handleUnlockedWheel}
+          onTouchStart={handleUnlockedTouchStart}
+          onTouchEnd={handleUnlockedTouchEnd}
         >
-          {items.map((project) => (
-            <div
+          {reelItems.map((project, index) => (
+            <motion.div
               key={project.number}
-              className="flex min-h-[70vh] snap-start snap-always items-stretch py-3 sm:min-h-[74vh]"
+              className="absolute inset-0"
+              initial={false}
+              animate={{
+                y:
+                  index < activeCardIndex
+                    ? '-100%'
+                    : index > activeCardIndex
+                      ? '100%'
+                      : '0%',
+              }}
+              transition={{
+                type: 'spring',
+                stiffness: 300,
+                damping: 30,
+              }}
+              style={{ zIndex: index === activeCardIndex ? 2 : 1 }}
             >
-              <ProjectCard {...project} variant="reel" />
-            </div>
+              <ReelProjectCard
+                project={project}
+                cardBgColor={REEL_CARD_BACKGROUNDS[index] ?? REEL_CARD_BACKGROUNDS[1]}
+              />
+            </motion.div>
           ))}
+        </div>
+
+        <div
+          className={cn(
+            'pointer-events-none absolute inset-x-0 bottom-7 z-20 flex flex-col items-center gap-1 transition-all duration-500',
+            isScrollLocked && !hasSeenBothCards ? 'opacity-100' : 'opacity-0',
+          )}
+        >
+          <div className="flex items-center gap-1.5">
+            {reelItems.map((project, index) => (
+              <span
+                key={`${project.number}-dot`}
+                className={cn(
+                  'h-1.5 w-1.5 rounded-full transition-all duration-500',
+                  activeCardIndex === index ? 'bg-white' : 'bg-white/30',
+                )}
+              />
+            ))}
+          </div>
+          <p
+            className={cn(
+              'text-[10px] text-white/30 transition-all duration-500',
+              activeCardIndex === 0 ? 'opacity-100' : 'opacity-0',
+            )}
+          >
+            scroll to see next project
+          </p>
         </div>
       </div>
     </div>
@@ -476,8 +743,7 @@ function ProjectReel({ items }: { items: ProjectCardData[] }) {
 }
 
 export function ProjectsVerticalFeed({ mode }: { mode: FeedMode }) {
-  const visibleProjects =
-    mode === 'homepage' ? projectCards.slice(0, 2) : projectCards;
+  const visibleProjects = mode === 'homepage' ? featuredProjectCards : projectCards;
 
   if (mode === 'page') {
     return (
