@@ -20,55 +20,51 @@ export default function ProjectList() {
         return (
           <motion.article
             key={project.title}
-            className="group relative overflow-hidden rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] transition-all duration-300"
+            className="group relative flex w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0D0D0D] transition-all duration-300 hover:-translate-y-1 hover:border-[#4ADE80]/50 hover:shadow-[0_0_30px_rgba(74,222,128,0.1)]"
             whileHover={{
-              y: -8,
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px #4ADE80',
+              y: -4,
             }}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.4, delay: index * 0.05 }}
           >
-            <div className="absolute top-5 left-5 z-10 rounded-md bg-[#0D0D0D]/80 px-3 py-1 backdrop-blur-sm">
-              <span className="font-mono text-xs text-white/40">
+            <div className="absolute top-3 left-3 z-10 rounded-md bg-black/60 px-2 py-1 backdrop-blur-sm">
+              <span className="font-mono text-xs text-white">
                 {String(index + 1).padStart(2, '0')}
               </span>
             </div>
 
-            <div className="relative h-55 overflow-hidden rounded-t-2xl bg-[#0D0D0D]">
+            <div className="relative h-45 w-full overflow-hidden">
               <Image
                 src={project.image}
                 alt={project.title}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-linear-to-b from-transparent to-[#1A1A1A]/20" />
             </div>
 
-            <div className="space-y-4 p-5">
-              <div className="inline-flex items-center rounded-full border border-[#4ADE80]/20 bg-[#4ADE80]/10 px-3 py-1">
-                <span className="text-xs text-[#4ADE80]">{category}</span>
+            <div className="space-y-3 p-4">
+              <div className="inline-flex w-fit items-center rounded-full border border-[#4ADE80]/30 bg-[#4ADE80]/10 px-3 py-1">
+                <span className="text-xs font-medium text-[#4ADE80]">{category}</span>
               </div>
 
-              <h3 className="text-xl font-semibold tracking-tight text-white">
+              <h3 className="text-base font-bold text-white">
                 {project.title}
               </h3>
 
-              <p className="line-clamp-2 text-sm leading-relaxed text-white/60">
+              <p className="line-clamp-2 text-xs leading-relaxed text-white/50">
                 {project.description}
               </p>
 
-              <div className="h-px bg-[#2A2A2A]" />
-
-              <div className="flex gap-3">
+              <div className="flex gap-2 pt-1">
                 {project.link ? (
                   <a
                     href={project.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2.5 text-sm text-white transition-all duration-200 hover:border-white/30 hover:bg-white/5"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 px-3 py-2.5 text-xs font-medium text-white/70 transition-all duration-200 hover:border-white/30 hover:bg-white/5 hover:text-white"
                   >
                     <ExternalLink className="h-4 w-4" />
                     <span>Live Site</span>
@@ -80,7 +76,7 @@ export default function ProjectList() {
                     href={project.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2.5 text-sm text-white transition-all duration-200 hover:border-white/30 hover:bg-white/5"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 px-3 py-2.5 text-xs font-medium text-white/70 transition-all duration-200 hover:border-white/30 hover:bg-white/5 hover:text-white"
                   >
                     <Github className="h-4 w-4" />
                     <span>GitHub</span>
