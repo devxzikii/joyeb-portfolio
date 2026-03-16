@@ -1,8 +1,7 @@
 'use client';
 
 import { projects } from '@/config/Projects';
-import GithubIcon from '@/components/svgs/Github';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Github } from 'lucide-react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -35,8 +34,13 @@ export function ProjectsVerticalFeed() {
             return (
               <motion.div
                 key={project.title}
-                className="group relative flex w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0D0D0D] transition-all duration-300 hover:-translate-y-1 hover:border-[#4ADE80]/50 hover:shadow-[0_0_30px_rgba(74,222,128,0.1)]"
-                initial={{ opacity: 0, y: 30 }}
+                className="group relative overflow-hidden rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] transition-all duration-300"
+                whileHover={{
+                  y: -8,
+                  boxShadow:
+                    '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px #4ADE80',
+                }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={
@@ -46,62 +50,68 @@ export function ProjectsVerticalFeed() {
                 }
               >
                 {/* Project number badge */}
-                <div className="absolute top-3 left-3 z-10 rounded-md bg-black/60 px-2 py-1 backdrop-blur-sm">
-                  <span className="font-mono text-xs text-white">
+                <div className="absolute top-5 left-5 z-10 rounded-md bg-[#0D0D0D]/80 px-3 py-1 backdrop-blur-sm">
+                  <span className="font-mono text-xs text-white/40">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                 </div>
 
                 {/* Image area */}
-                <div className="relative h-45 w-full overflow-hidden">
+                <div className="relative h-55 overflow-hidden rounded-t-2xl bg-[#0D0D0D]">
                   <Image
                     src={project.image}
                     alt={project.title}
                     fill
                     sizes="100vw"
-                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
+                  <div className="absolute inset-0 bg-linear-to-b from-transparent to-[#1A1A1A]/20" />
                 </div>
 
-                {/* Category tag */}
-                <div className="mx-4 mt-3 inline-flex w-fit rounded-full border border-[#4ADE80]/30 bg-[#4ADE80]/10 px-3 py-1 text-xs font-medium text-[#4ADE80]">
-                  {category}
-                </div>
+                <div className="space-y-4 p-5">
+                  {/* Category tag */}
+                  <div className="inline-flex items-center rounded-full border border-[#4ADE80]/20 bg-[#4ADE80]/10 px-3 py-1">
+                    <span className="text-xs text-[#4ADE80]">{category}</span>
+                  </div>
 
-                {/* Title */}
-                <h3 className="mx-4 mt-2 text-base font-bold text-white">
-                  {project.title}
-                </h3>
+                  {/* Title */}
+                  <h3 className="text-xl font-semibold tracking-tight text-white">
+                    {project.title}
+                  </h3>
 
-                {/* Description */}
-                <p className="mx-4 mt-1 mb-3 line-clamp-2 text-xs leading-relaxed text-white/50">
-                  {project.description}
-                </p>
+                  {/* Description */}
+                  <p className="line-clamp-2 text-sm leading-relaxed text-white/60">
+                    {project.description}
+                  </p>
 
-                {/* Buttons row */}
-                <div className="mx-4 mt-auto mb-4 flex gap-2">
-                  {project.link && (
-                    <a
-                      href={project.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-transparent py-2.5 text-xs font-medium text-white/70 transition-all duration-200 hover:border-white/30 hover:bg-white/5 hover:text-white"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      <span>Live Site</span>
-                    </a>
-                  )}
-                  {project.github && (
-                    <a
-                      href={project.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-transparent py-2.5 text-xs font-medium text-white/70 transition-all duration-200 hover:border-white/30 hover:bg-white/5 hover:text-white"
-                    >
-                      <GithubIcon className="h-4 w-4" />
-                      <span>GitHub</span>
-                    </a>
-                  )}
+                  {/* Divider */}
+                  <div className="h-px bg-[#2A2A2A]" />
+
+                  {/* Footer Buttons */}
+                  <div className="flex gap-3">
+                    {project.link && (
+                      <a
+                        href={project.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2.5 text-sm text-white transition-all duration-200 hover:border-white/30 hover:bg-white/5"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        <span>Live Site</span>
+                      </a>
+                    )}
+                    {project.github && (
+                      <a
+                        href={project.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2.5 text-sm text-white transition-all duration-200 hover:border-white/30 hover:bg-white/5"
+                      >
+                        <Github className="h-4 w-4" />
+                        <span>GitHub</span>
+                      </a>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             );
