@@ -20,7 +20,7 @@ export default function ProjectList() {
         return (
           <motion.article
             key={project.title}
-            className="group relative flex w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0D0D0D] transition-all duration-300 hover:-translate-y-1 hover:border-[#4ADE80]/50 hover:shadow-[0_0_30px_rgba(74,222,128,0.1)]"
+            className="group relative mx-auto flex w-full max-w-84 flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0D0D0D] transition-all duration-300 hover:-translate-y-1 hover:border-[#4ADE80]/50 hover:shadow-[0_0_30px_rgba(74,222,128,0.1)]"
             whileHover={{
               y: -4,
             }}
@@ -47,7 +47,9 @@ export default function ProjectList() {
 
             <div className="space-y-3 p-4">
               <div className="inline-flex w-fit items-center rounded-full border border-[#4ADE80]/30 bg-[#4ADE80]/10 px-3 py-1">
-                <span className="text-xs font-medium text-[#4ADE80]">{category}</span>
+                <span className="text-xs font-medium text-[#4ADE80]">
+                  {category}
+                </span>
               </div>
 
               <h3 className="text-base font-bold text-white">

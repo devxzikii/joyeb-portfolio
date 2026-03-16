@@ -28,7 +28,7 @@ export function ProjectsVerticalFeed() {
           <h2 className="text-3xl font-bold md:text-4xl">My Work</h2>
         </div>
 
-        <div className="mx-auto flex w-full max-w-sm flex-col gap-5">
+        <div className="mx-auto flex w-full max-w-84 flex-col gap-5">
           {featuredProjects.map((project, index) => {
             const category = getCategory(project);
             return (
@@ -68,7 +68,9 @@ export function ProjectsVerticalFeed() {
                 <div className="space-y-3 p-4">
                   {/* Category tag */}
                   <div className="inline-flex w-fit items-center rounded-full border border-[#4ADE80]/30 bg-[#4ADE80]/10 px-3 py-1">
-                    <span className="text-xs font-medium text-[#4ADE80]">{category}</span>
+                    <span className="text-xs font-medium text-[#4ADE80]">
+                      {category}
+                    </span>
                   </div>
 
                   {/* Title */}
