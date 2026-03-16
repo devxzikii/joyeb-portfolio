@@ -1,8 +1,7 @@
 'use client';
 
 import { projects } from '@/config/Projects';
-import GithubIcon from '@/components/svgs/Github';
-import { ArrowUpRight } from 'lucide-react';
+import { ExternalLink, Github } from 'lucide-react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -26,100 +25,92 @@ export function ProjectsVerticalFeed({ mode }: { mode: 'homepage' | 'page' }) {
           <h2 className="text-3xl font-bold md:text-4xl">My Work</h2>
         </div>
 
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 md:gap-6">
+        <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-3 py-3 md:gap-4 md:px-4 md:py-4">
           {(mode === 'homepage'
             ? visibleProjects.slice(0, 2)
             : visibleProjects
           ).map((project, index) => {
-            const cardBgColor = index === 0 ? '#1a2018' : '#1a1824';
-            const transition =
-              index === 0 ? { duration: 0.5 } : { duration: 0.5, delay: 0.15 };
+            const category =
+              project.technologies.length > 0
+                ? project.technologies
+                    .slice(0, 2)
+                    .map((technology) => technology.name)
+                    .join(' / ')
+                : 'Web Project';
 
             return (
-              <motion.article
-                key={project.title}
-                className="border-border/40 flex w-full flex-col overflow-hidden rounded-2xl border"
-                style={{ backgroundColor: cardBgColor }}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={transition}
-                viewport={{ once: true, amount: 0.2 }}
-              >
-                <div className="relative h-44 w-full overflow-hidden md:h-56">
-                  <Image
-                    src={project.image}
-                    alt={project.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 768px"
-                    className="object-cover"
-                  />
-                  <div
-                    className="absolute bottom-0 left-0 h-10 w-full"
-                    style={{
-                      backgroundImage: `linear-gradient(to bottom, transparent, ${cardBgColor})`,
-                    }}
-                  />
-                </div>
-
-                <div className="flex w-full flex-col justify-between gap-4 p-4 md:p-5">
-                  <div>
-                    <p className="font-mono text-[10px] tracking-widest text-white/30">
+              <div key={project.title} className="mx-auto w-full max-w-[95%]">
+                <motion.div
+                  className="group relative overflow-hidden rounded-2xl border border-[#2A2A2A] bg-[#1A1A1A] transition-all duration-300"
+                  whileHover={{
+                    y: -8,
+                    boxShadow:
+                      '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px #4ADE80',
+                  }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={
+                    index === 0
+                      ? { duration: 0.4 }
+                      : { duration: 0.4, delay: 0.15 }
+                  }
+                >
+                  <div className="absolute top-5 left-5 z-10 rounded-md bg-[#0D0D0D]/80 px-3 py-1 backdrop-blur-sm">
+                    <span className="font-mono text-xs text-white/40">
                       {String(index + 1).padStart(2, '0')}
-                    </p>
-                    <h3 className="mt-1 text-base font-semibold text-white md:text-lg">
+                    </span>
+                  </div>
+
+                  <div className="relative h-[220px] overflow-hidden rounded-t-2xl bg-[#0D0D0D]">
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      sizes="100vw"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#1A1A1A]/20" />
+                  </div>
+
+                  <div className="space-y-4 p-5">
+                    <div className="inline-flex items-center rounded-full border border-[#4ADE80]/20 bg-[#4ADE80]/10 px-3 py-1">
+                      <span className="text-xs text-[#4ADE80]">{category}</span>
+                    </div>
+
+                    <h3 className="text-xl font-semibold tracking-tight text-white">
                       {project.title}
                     </h3>
-                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/50 md:text-sm">
+
+                    <p className="line-clamp-2 text-sm leading-relaxed text-white/60">
                       {project.description}
                     </p>
-                  </div>
 
-                  <div className="mt-2 flex flex-col gap-2">
-                    <div className="flex w-full items-center justify-between">
-                      <div>
-                        {project.link ? (
-                          <a
-                            href={project.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 text-[10px] text-white/50 transition-colors hover:text-white/80"
-                          >
-                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400/70" />
-                            <span>Live Demo</span>
-                            <ArrowUpRight className="h-3 w-3 text-white/50" />
-                          </a>
-                        ) : null}
-                      </div>
+                    <div className="h-px bg-[#2A2A2A]" />
 
-                      <div>
-                        {project.github ? (
-                          <a
-                            href={project.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 text-[10px] text-white/50 transition-colors hover:text-white/80"
-                          >
-                            <GithubIcon className="h-3.5 w-3.5 text-white/50" />
-                            <span>Source Code</span>
-                          </a>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    <div className="mt-1 flex items-center gap-1.5">
-                      {project.technologies?.map((technology, iconIndex) => (
-                        <span
-                          key={`${project.title}-${technology.name}-${iconIndex}`}
-                          title={technology.name}
-                          className="flex h-5 w-5 items-center justify-center rounded-md bg-white/10 object-contain p-0.5 [&_img]:h-full [&_img]:w-full [&_svg]:h-full [&_svg]:w-full"
-                        >
-                          {technology.icon}
-                        </span>
-                      ))}
+                    <div className="flex gap-3">
+                      <a
+                        href={project.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2.5 text-sm text-white transition-all duration-200 hover:border-white/30 hover:bg-white/5"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        <span>Live Site</span>
+                      </a>
+                      <a
+                        href={project.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2.5 text-sm text-white transition-all duration-200 hover:border-white/30 hover:bg-white/5"
+                      >
+                        <Github className="h-4 w-4" />
+                        <span>GitHub</span>
+                      </a>
                     </div>
                   </div>
-                </div>
-              </motion.article>
+                </motion.div>
+              </div>
             );
           })}
         </div>
