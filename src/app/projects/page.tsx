@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function ProjectsPage() {
   return (
-    <main className="relative min-h-screen bg-background text-foreground transition-colors">
+    <main className="bg-background text-foreground relative min-h-screen transition-colors">
       <ProjectList />
     </main>
   );

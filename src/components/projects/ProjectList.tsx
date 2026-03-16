@@ -33,7 +33,11 @@ export default function ProjectList() {
 
         return (
           <div key={project.title} className="w-full">
-            <Link href={projectHref} className="block w-full" aria-label={`Open ${project.title}`}>
+            <Link
+              href={projectHref}
+              className="block w-full"
+              aria-label={`Open ${project.title}`}
+            >
               <motion.article
                 className="group relative flex w-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1A1A1A] transition-all duration-300 hover:-translate-y-1 hover:border-[#4ADE80]/50 hover:shadow-[0_0_30px_rgba(74,222,128,0.1)]"
                 initial={{ opacity: 0, y: 30 }}
@@ -57,28 +61,32 @@ export default function ProjectList() {
                   />
                 </div>
 
-                <div className="mt-3 mx-4 inline-flex items-center rounded-full border border-[#4ADE80]/30 bg-[#4ADE80]/10 px-3 py-1">
+                <div className="mx-4 mt-3 inline-flex items-center rounded-full border border-[#4ADE80]/30 bg-[#4ADE80]/10 px-3 py-1">
                   <span className="text-xs font-medium text-[#4ADE80]">
                     {category}
                   </span>
                 </div>
 
-                <h3 className="mt-2 mx-4 text-lg leading-snug font-bold text-white">
+                <h3 className="mx-4 mt-2 text-lg leading-snug font-bold text-white">
                   {project.title}
                 </h3>
 
-                <p className="mt-1 mx-4 mb-4 line-clamp-2 text-sm leading-relaxed text-white/50">
+                <p className="mx-4 mt-1 mb-4 line-clamp-2 text-sm leading-relaxed text-white/50">
                   {project.description}
                 </p>
 
-                <div className="mt-auto mx-4 mb-4 flex items-center gap-3 relative z-20">
+                <div className="relative z-20 mx-4 mt-auto mb-4 flex items-center gap-3">
                   {project.link ? (
                     <button
                       type="button"
                       onClick={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
-                        window.open(project.link, '_blank', 'noopener,noreferrer');
+                        window.open(
+                          project.link,
+                          '_blank',
+                          'noopener,noreferrer',
+                        );
                       }}
                       className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-transparent py-2.5 text-sm font-medium text-white/70 transition-all duration-200 hover:border-white/30 hover:bg-white/5 hover:text-white"
                     >
@@ -93,7 +101,11 @@ export default function ProjectList() {
                       onClick={(event) => {
                         event.preventDefault();
                         event.stopPropagation();
-                        window.open(project.github, '_blank', 'noopener,noreferrer');
+                        window.open(
+                          project.github,
+                          '_blank',
+                          'noopener,noreferrer',
+                        );
                       }}
                       className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-transparent py-2.5 text-sm font-medium text-white/70 transition-all duration-200 hover:border-white/30 hover:bg-white/5 hover:text-white"
                     >
