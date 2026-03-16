@@ -1,6 +1,7 @@
 'use client';
 
 import { projects } from '@/config/Projects';
+import { cn } from '@/lib/utils';
 import { ExternalLink, Github, PlayCircle } from 'lucide-react';
 import {
   motion,
@@ -25,6 +26,8 @@ type ProjectCardData = {
   githubUrl: string;
   technologies: { name: string; icon: React.ReactNode }[];
 };
+
+type ProjectCardVariant = 'default' | 'reel';
 
 const CARD_ACCENT = '#4ADE80';
 
@@ -91,9 +94,13 @@ const ProjectCard = memo(function ProjectCard({
   liveUrl,
   githubUrl,
   technologies,
-}: ProjectCardData): React.JSX.Element {
+  variant = 'default',
+}: ProjectCardData & {
+  variant?: ProjectCardVariant;
+}): React.JSX.Element {
   const cardRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const isReel = variant === 'reel';
   const { scrollYProgress } = useScroll({
     target: cardRef,
     offset: ['start 0.92', 'end 0.08'],
@@ -132,10 +139,15 @@ const ProjectCard = memo(function ProjectCard({
   );
 
   return (
-    <div ref={cardRef} className="mx-auto w-full max-w-lg">
-      <motion.div style={{ y: cardY }}>
+    <div ref={cardRef} className={cn('mx-auto w-full', isReel ? 'max-w-none' : 'max-w-lg')}>
+      <motion.div style={{ y: cardY }} className={cn(isReel && 'h-full')}>
         <motion.div
-          className="group relative w-full overflow-hidden rounded-[1.35rem] border border-black/8 bg-white/70 p-2 shadow-[0_18px_40px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 supports-backdrop-filter:bg-white/75 dark:border-white/10 dark:bg-white/6 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] dark:supports-backdrop-filter:bg-white/8"
+          className={cn(
+            'group relative w-full overflow-hidden rounded-[1.35rem] border bg-white/70 backdrop-blur-xl transition-all duration-300 supports-backdrop-filter:bg-white/75 dark:bg-white/6 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] dark:supports-backdrop-filter:bg-white/8',
+            isReel
+              ? 'h-full border-black/12 p-2.5 shadow-[0_24px_70px_rgba(15,23,42,0.12)] dark:border-white/14'
+              : 'border-black/8 p-2 shadow-[0_18px_40px_rgba(15,23,42,0.08)] dark:border-white/10',
+          )}
           whileHover={
             prefersReducedMotion
               ? undefined
@@ -164,9 +176,17 @@ const ProjectCard = memo(function ProjectCard({
             className="pointer-events-none absolute inset-px rounded-[1.25rem] bg-linear-to-br from-white/75 via-white/30 to-transparent dark:from-white/10 dark:via-white/4"
           />
 
-          <article className="relative overflow-hidden rounded-[1.05rem] border border-black/8 bg-white/95 dark:border-[#2A2A2A] dark:bg-[#1A1A1A]">
+          <article
+            className={cn(
+              'relative overflow-hidden rounded-[1.05rem] border border-black/8 bg-white/95 dark:border-[#2A2A2A] dark:bg-[#1A1A1A]',
+              isReel && 'flex h-full flex-col border-black/10 dark:border-white/12',
+            )}
+          >
             <motion.div
-              className="relative h-60 overflow-hidden rounded-t-[1.05rem] bg-slate-100 sm:h-64 dark:bg-[#0D0D0D]"
+              className={cn(
+                'relative overflow-hidden rounded-t-[1.05rem] bg-slate-100 dark:bg-[#0D0D0D]',
+                isReel ? 'h-72 sm:h-80 lg:h-88' : 'h-60 sm:h-64',
+              )}
               style={{ scale: imageScale }}
             >
               <Image
@@ -179,7 +199,7 @@ const ProjectCard = memo(function ProjectCard({
               <div className="absolute inset-0 bg-linear-to-b from-transparent to-slate-950/10 dark:to-[#1A1A1A]/20" />
             </motion.div>
 
-            <div className="space-y-4 p-5">
+            <div className={cn('space-y-4 p-5', isReel && 'flex flex-1 flex-col p-5 sm:p-6')}>
               <div className="inline-flex items-center rounded-full border border-[#4ADE80]/20 bg-[#4ADE80]/10 px-3 py-1">
                 <span className="text-xs text-[#4ADE80]">{category}</span>
               </div>
@@ -188,35 +208,42 @@ const ProjectCard = memo(function ProjectCard({
                 {title}
               </h3>
 
-              <p className="line-clamp-2 text-sm leading-relaxed text-slate-600 dark:text-white/60">
+              <p
+                className={cn(
+                  'text-sm leading-relaxed text-slate-600 dark:text-white/60',
+                  isReel ? 'line-clamp-3 sm:line-clamp-4' : 'line-clamp-2',
+                )}
+              >
                 {description}
               </p>
 
-              <div className="flex items-center gap-2">
-                {technologies.slice(0, 3).map((technology, iconIndex) => (
-                  <span
-                    key={`${title}-${technology.name}-${iconIndex}`}
-                    title={technology.name}
-                    className="flex h-7 w-7 items-center justify-center rounded-md border border-black/10 bg-slate-100 text-slate-700 [&_img]:h-3.5 [&_img]:w-3.5 [&_svg]:h-3.5 [&_svg]:w-3.5 dark:border-white/15 dark:bg-black/20 dark:text-white"
-                  >
-                    {technology.icon}
-                  </span>
-                ))}
-              </div>
+              <div className={cn(isReel && 'mt-auto space-y-4')}>
+                <div className="flex items-center gap-2">
+                  {technologies.slice(0, 3).map((technology, iconIndex) => (
+                    <span
+                      key={`${title}-${technology.name}-${iconIndex}`}
+                      title={technology.name}
+                      className="flex h-7 w-7 items-center justify-center rounded-md border border-black/10 bg-slate-100 text-slate-700 [&_img]:h-3.5 [&_img]:w-3.5 [&_svg]:h-3.5 [&_svg]:w-3.5 dark:border-white/15 dark:bg-black/20 dark:text-white"
+                    >
+                      {technology.icon}
+                    </span>
+                  ))}
+                </div>
 
-              <div className="h-px bg-black/8 dark:bg-[#2A2A2A]" />
+                <div className="h-px bg-black/8 dark:bg-[#2A2A2A]" />
 
-              <div className="flex gap-3">
-                <ActionButton
-                  href={liveUrl}
-                  icon={<PlayCircle className="h-4 w-4" />}
-                  label="Live Preview"
-                />
-                <ActionButton
-                  href={githubUrl}
-                  icon={<Github className="h-4 w-4" />}
-                  label={githubUrl ? 'Source Code' : 'Private'}
-                />
+                <div className="flex gap-3">
+                  <ActionButton
+                    href={liveUrl}
+                    icon={<PlayCircle className="h-4 w-4" />}
+                    label="Live Preview"
+                  />
+                  <ActionButton
+                    href={githubUrl}
+                    icon={<Github className="h-4 w-4" />}
+                    label={githubUrl ? 'Source Code' : 'Private'}
+                  />
+                </div>
               </div>
             </div>
           </article>
@@ -323,6 +350,37 @@ function ProjectCardList({
   );
 }
 
+function ProjectReel({ items }: { items: ProjectCardData[] }) {
+  return (
+    <div className="relative mx-auto w-full max-w-3xl">
+      <div className="pointer-events-none absolute inset-x-7 top-7 z-20 flex items-center justify-between">
+        <span className="rounded-full border border-black/10 bg-background/80 px-3 py-1 text-[11px] font-medium tracking-[0.22em] text-muted-foreground uppercase backdrop-blur-sm dark:border-white/12">
+          Project Reel
+        </span>
+        <span className="rounded-full border border-black/10 bg-background/80 px-3 py-1 text-[11px] font-medium text-muted-foreground backdrop-blur-sm dark:border-white/12">
+          Scroll to switch
+        </span>
+      </div>
+
+      <div className="relative overflow-hidden rounded-4xl border border-black/10 bg-linear-to-b from-black/3 via-transparent to-transparent p-3 shadow-[0_28px_80px_rgba(15,23,42,0.12)] dark:border-white/12 dark:from-white/4">
+        <div className="pointer-events-none absolute inset-x-3 top-3 z-10 h-16 rounded-t-3xl bg-linear-to-b from-background/90 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-3 bottom-3 z-10 h-20 rounded-b-3xl bg-linear-to-t from-background/95 to-transparent" />
+
+        <div className="scrollbar-hidden relative h-[70vh] min-h-136 max-h-192 snap-y snap-mandatory overflow-y-auto overscroll-y-contain scroll-smooth rounded-[1.55rem] px-1 sm:h-[74vh]">
+          {items.map((project) => (
+            <div
+              key={project.number}
+              className="flex min-h-[70vh] snap-start snap-always items-stretch py-3 sm:min-h-[74vh]"
+            >
+              <ProjectCard {...project} variant="reel" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ProjectsVerticalFeed({ mode }: { mode: FeedMode }) {
   const visibleProjects =
     mode === 'homepage' ? projectCards.slice(0, 2) : projectCards;
@@ -360,7 +418,7 @@ export function ProjectsVerticalFeed({ mode }: { mode: FeedMode }) {
         </p>
       </div>
 
-      <ProjectCardList items={visibleProjects} stacked />
+      <ProjectReel items={visibleProjects} />
 
       <div className="flex justify-center">
         <Link

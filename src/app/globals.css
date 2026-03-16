@@ -149,6 +149,15 @@ html {
   font-family: 'Hanken Grotesk Italic', sans-serif;
 }
 
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
 /* Code block copy button styles */
 .prose pre {
   @apply relative;
