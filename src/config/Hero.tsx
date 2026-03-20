@@ -119,12 +119,12 @@ export const socialLinks = [
   },
   {
     name: 'X',
-    href: 'https://x.com/joyebdev',
+    href: 'https://x.com/devxziki',
     icon: <X className="h-[22px] w-[22px]" />,
   },
   {
     name: 'Instagram',
-    href: 'https://www.instagram.com/_joyeb',
+    href: 'https://www.instagram.com/devxziki',
     icon: <Instagram className="h-[22px] w-[22px]" />,
   },
   {

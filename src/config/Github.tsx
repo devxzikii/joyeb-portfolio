@@ -5,11 +5,11 @@
  * Update the username to match your GitHub profile.
  */
 
-export const GITHUB_USERNAME = 'joyebdev';
+export const GITHUB_USERNAME = 'devxziki';
 export const GITHUB_PROFILE_URL = `https://github.com/${GITHUB_USERNAME}`;
 
 export function getGithubRepoUrl(repository: string): string {
-  return `${GITHUB_PROFILE_URL}/${repository}.git`;
+  return `${GITHUB_PROFILE_URL}/${repository}`;
 }
 
 export const githubConfig = {

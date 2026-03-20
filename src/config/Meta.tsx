@@ -36,12 +36,12 @@ function getSiteUrl(rawUrl?: string): string {
 export const siteConfig = {
   name: heroConfig.name,
   title: 'Sleek Portfolio',
-  description: 'Sleek Portfolio Template by @joyebdev',
+  description: 'Sleek Portfolio Template by @devxziki',
   url: getSiteUrl(process.env.NEXT_PUBLIC_URL),
   ogImage: '/meta/opengraph-image.png',
   author: {
     name: about.name,
-    twitter: '@joyebdev',
+    twitter: '@devxziki',
     github: GITHUB_USERNAME,
     linkedin: 'joyeb-kothiya-197b783b6',
     email: 'joyebkofficial@gmail.com',
