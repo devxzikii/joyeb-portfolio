@@ -5,6 +5,35 @@ import path from 'path';
 
 const blogDirectory = path.join(process.cwd(), 'src/data/blog');
 
+function parseBlogFrontmatter(data: Record<string, unknown>): BlogFrontmatter | null {
+  const title = typeof data.title === 'string' ? data.title : null;
+  const description = typeof data.description === 'string' ? data.description : null;
+  const date = typeof data.date === 'string' ? data.date : null;
+
+  if (!title || !description || !date) {
+    return null;
+  }
+
+  return {
+    title,
+    description,
+    date,
+    image: typeof data.image === 'string' ? data.image : undefined,
+    tags: Array.isArray(data.tags)
+      ? data.tags.filter((tag): tag is string => typeof tag === 'string')
+      : undefined,
+    tag: typeof data.tag === 'string' ? data.tag : undefined,
+    readTime: typeof data.readTime === 'string' ? data.readTime : undefined,
+    slug: typeof data.slug === 'string' ? data.slug : undefined,
+    published: typeof data.published === 'boolean' ? data.published : undefined,
+    isPublished:
+      typeof data.isPublished === 'boolean' ? data.isPublished : undefined,
+    author: typeof data.author === 'string' ? data.author : undefined,
+    originalUrl:
+      typeof data.originalUrl === 'string' ? data.originalUrl : undefined,
+  };
+}
+
 function isBlogPostPublished(frontmatter: BlogFrontmatter): boolean {
   return frontmatter.published ?? frontmatter.isPublished ?? false;
 }
@@ -50,8 +79,8 @@ export function getBlogPostBySlug(slug: string): BlogPost | null {
     const { data, content } = matter(fileContents);
 
     // Validate frontmatter
-    const frontmatter = data as BlogFrontmatter;
-    if (!frontmatter.title || !frontmatter.description) {
+    const frontmatter = parseBlogFrontmatter(data as Record<string, unknown>);
+    if (!frontmatter) {
       throw new Error(`Invalid frontmatter in ${slug}.mdx`);
     }
 

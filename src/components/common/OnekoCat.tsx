@@ -1,5 +1,5 @@
 import { catConfig } from '@/config/Cat';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 const ONEKO_SCRIPT_ID = 'oneko-script';
 

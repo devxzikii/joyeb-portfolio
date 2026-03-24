@@ -58,7 +58,7 @@ export default function Blog({ posts }: BlogProps) {
   const [frameWidth, setFrameWidth] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const x = useMotionValue(0);
+  const x = useMotionValue<number>(0);
 
   const safePosts = posts as BlogPostPreview[];
   const totalPosts = safePosts.length;

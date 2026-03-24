@@ -48,7 +48,7 @@ function BlogCard({ post, index }: { post: BlogPostPreview; index: number }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="block h-[260px] w-[320px] shrink-0"
+      className="block h-65 w-[320px] shrink-0"
     >
       <div className="relative flex h-full w-full flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-6 transition-colors duration-200 hover:border-border/60">
         <span className="pointer-events-none absolute right-4 top-2 select-none text-7xl font-black leading-none text-muted-foreground/10">

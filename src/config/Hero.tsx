@@ -110,26 +110,26 @@ export const socialLinks = [
   {
     name: 'Github',
     href: GITHUB_PROFILE_URL,
-    icon: <Github className="h-[22px] w-[22px]" />,
+    icon: <Github className="h-5.5 w-5.5" />,
   },
   {
     name: 'LinkedIn',
     href: 'https://www.linkedin.com/in/joyeb-kothiya-197b783b6',
-    icon: <LinkedIn className="h-[22px] w-[22px]" />,
+    icon: <LinkedIn className="h-5.5 w-5.5" />,
   },
   {
     name: 'X',
     href: 'https://x.com/devxziki',
-    icon: <X className="h-[22px] w-[22px]" />,
+    icon: <X className="h-5.5 w-5.5" />,
   },
   {
     name: 'Instagram',
     href: 'https://www.instagram.com/devxziki',
-    icon: <Instagram className="h-[22px] w-[22px]" />,
+    icon: <Instagram className="h-5.5 w-5.5" />,
   },
   {
     name: 'Email',
     href: 'mailto:joyebkofficial@gmail.com',
-    icon: <Mail className="h-[22px] w-[22px]" />,
+    icon: <Mail className="h-5.5 w-5.5" />,
   },
 ];
