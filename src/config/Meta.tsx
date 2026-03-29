@@ -112,6 +112,9 @@ export function generateMetadata(pathname: string) {
 
   return {
     metadataBase: new URL(siteConfig.url),
+    icons: {
+      icon: '/favicon.ico',
+    },
     title: pageMeta.title,
     description: pageMeta.description,
     keywords: pageMeta.keywords?.join(', '),

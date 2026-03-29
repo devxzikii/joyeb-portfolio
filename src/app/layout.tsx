@@ -2,7 +2,6 @@ import UmamiAnalytics from '@/components/analytics/UmamiAnalytics';
 import ClientOverlays from '@/components/common/ClientOverlays';
 import Footer from '@/components/common/Footer';
 import Navbar from '@/components/common/Navbar';
-import DynamicFavicon from '@/components/common/DynamicFavicon';
 import { ThemeProvider } from '@/components/common/ThemeProviders';
 import { generateMetadata as getMetadata } from '@/config/Meta';
 import { lenisOptions } from '@/lib/lenis';
@@ -29,9 +28,6 @@ export default function RootLayout({
   return (
     <ViewTransitions>
       <html lang="en" suppressHydrationWarning>
-        <head>
-          <link rel="icon" href="/favicon-light.png?v=3" sizes="any" />
-        </head>
         <body className={`font-hanken-grotesk overflow-x-hidden antialiased`}>
           <ThemeProvider
             attribute="class"
@@ -39,7 +35,6 @@ export default function RootLayout({
             enableSystem
           >
             <ReactLenis root options={lenisOptions}>
-              <DynamicFavicon />
               <Navbar />
               {children}
               <ClientOverlays />
