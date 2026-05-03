@@ -55,29 +55,34 @@ function toUserFriendlyChatError(message: string): string {
   return message;
 }
 
+function getTimestamp(): string {
+  return new Date().toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function createMessage(id: number, text: string, sender: 'user' | 'bot', isStreaming = false): Message {
+  return {
+    id,
+    text,
+    sender,
+    timestamp: getTimestamp(),
+    isStreaming,
+  };
+}
+
+function generateMessageId(): number {
+  return Date.now();
+}
+
 const ChatBubble: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { triggerHaptic, isMobile } = useHapticFeedback();
-
-  // Set initial message timestamp on client-side only to prevent hydration mismatch
-  useEffect(() => {
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === 1
-          ? {
-              ...msg,
-              timestamp: new Date().toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              }),
-            }
-          : msg,
-      ),
-    );
-  }, []);
+  const streamingTextRef = useRef<string>('');
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
@@ -100,32 +105,15 @@ const ChatBubble: React.FC = () => {
     }
 
     const messageText = newMessage.trim();
-    const userMessage: Message = {
-      id: Date.now(),
-      text: messageText,
-      sender: 'user',
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-    };
+    const userMessage = createMessage(generateMessageId(), messageText, 'user');
 
     setMessages((prev) => [...prev, userMessage]);
     setNewMessage('');
     setIsLoading(true);
 
     // Create a temporary bot message for streaming
-    const botMessageId = Date.now() + 1;
-    const botMessage: Message = {
-      id: botMessageId,
-      text: '',
-      sender: 'bot',
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      isStreaming: true,
-    };
+    const botMessageId = generateMessageId() + 1;
+    const botMessage = createMessage(botMessageId, '', 'bot', true);
 
     setMessages((prev) => [...prev, botMessage]);
 
@@ -148,31 +136,14 @@ const ChatBubble: React.FC = () => {
 
     setNewMessage(suggestion);
     // Auto-send the suggestion
-    const userMessage: Message = {
-      id: Date.now(),
-      text: suggestion,
-      sender: 'user',
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-    };
+    const userMessage = createMessage(generateMessageId(), suggestion, 'user');
 
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
     // Create a temporary bot message for streaming
-    const botMessageId = Date.now() + 1;
-    const botMessage: Message = {
-      id: botMessageId,
-      text: '',
-      sender: 'bot',
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      isStreaming: true,
-    };
+    const botMessageId = generateMessageId() + 1;
+    const botMessage = createMessage(botMessageId, '', 'bot', true);
 
     setMessages((prev) => [...prev, botMessage]);
 
@@ -224,7 +195,7 @@ const ChatBubble: React.FC = () => {
         throw new Error('No reader available');
       }
 
-      let accumulatedText = '';
+      streamingTextRef.current = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -244,16 +215,17 @@ const ChatBubble: React.FC = () => {
               }
 
               if (data.text) {
-                accumulatedText += data.text;
+                const newText = streamingTextRef.current + data.text;
 
                 // Update the streaming message in real-time
                 setMessages((prev) =>
                   prev.map((msg) =>
                     msg.id === botMessageId
-                      ? { ...msg, text: accumulatedText, isStreaming: true }
+                      ? { ...msg, text: newText, isStreaming: true }
                       : msg,
                   ),
                 );
+                streamingTextRef.current = newText;
               }
 
               if (data.done) {
@@ -261,7 +233,7 @@ const ChatBubble: React.FC = () => {
                 setMessages((prev) =>
                   prev.map((msg) =>
                     msg.id === botMessageId
-                      ? { ...msg, text: accumulatedText, isStreaming: false }
+                      ? { ...msg, text: streamingTextRef.current, isStreaming: false }
                       : msg,
                   ),
                 );

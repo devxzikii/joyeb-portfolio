@@ -1,5 +1,4 @@
 import { ProjectCard } from '@/components/projects/ProjectCard';
-import SectionHeading from '@/components/common/SectionHeading';
 import { projects } from '@/config/Projects';
 
 export default function MyWorkSection() {

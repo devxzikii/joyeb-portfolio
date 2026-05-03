@@ -205,7 +205,7 @@ export default function Github() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState<number>(0);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [changedCells, setChangedCells] = useState<Set<string>>(new Set());
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -267,6 +267,7 @@ export default function Github() {
       setData(payload);
       setGraphDays(normalizedDays);
       setLastUpdatedAt(Date.now());
+      setNow(Date.now());
     } catch {
       setHasError(true);
     } finally {
@@ -287,6 +288,7 @@ export default function Github() {
   useEffect(() => {
     if (!hasLoadedOnce && graphDays.length > 0) {
       setHasLoadedOnce(true);
+      setNow(Date.now());
     }
   }, [graphDays.length, hasLoadedOnce]);
 

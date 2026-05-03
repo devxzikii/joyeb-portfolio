@@ -1,13 +1,11 @@
 import Container from '@/components/common/Container';
 import ArrowLeft from '@/components/svgs/ArrowLeft';
-import { TechStackPills } from '@/components/projects/TechStackPills';
 import { projects, getProjectBySlug } from '@/config/Projects';
 import { siteConfig } from '@/config/Meta';
 import type { Metadata } from 'next';
 import { TypographyBanner } from '@/components/projects/TypographyBanner';
 import { Link } from 'next-view-transitions';
 import { notFound } from 'next/navigation';
-import { ExternalLink, Github } from 'lucide-react';
 
 interface ProjectPageProps {
   params: Promise<{ slug: string }>;
@@ -44,9 +42,6 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   if (!project) {
     notFound();
   }
-
-  const actionBtnClass =
-    'inline-flex items-center justify-center gap-2 rounded-xl bg-black/5 px-4 py-2.5 text-sm font-medium text-black/80 transition-colors hover:bg-black/10 hover:text-black dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white';
 
   return (
     <Container className="min-h-screen px-4 py-12 sm:py-16">
